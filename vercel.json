@@ -1,10 +1,7 @@
 {
-  "version": 2,
   "outputDirectory": "dist",
   "cleanUrls": true,
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "^/admin(/.*)?$", "dest": "/admin/index.html" },
-    { "src": "^/(.*)$", "dest": "/$1" }
+  "rewrites": [
+    { "source": "/admin/:path*", "destination": "/admin/index.html" }
   ]
 }
