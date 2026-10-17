@@ -1,0 +1,19 @@
+{
+  "name": "dentalclinic",
+  "version": "1.0.0",
+  "description": "Lumière Dental Studio - Luxury Clinic Website & Admin Portal",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "start": "npx --yes serve dist -l 3000"
+  },
+  "keywords": [
+    "dental",
+    "clinic",
+    "admin-dashboard",
+    "appointments",
+    "supabase"
+  ],
+  "author": "Lumière Dental Studio",
+  "license": "ISC"
+}

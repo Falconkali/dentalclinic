@@ -1,0 +1,21 @@
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
+serve(async (req) => {
+ if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+ if (req.method !== 'POST') return new Response('Method not allowed', { status: 405, headers: cors });
+ const url = Deno.env.get('SUPABASE_URL'), service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+ if (!url || !service) return new Response(JSON.stringify({ error: 'Missing Supabase configuration' }), { status: 500, headers: { ...cors, 'Content-Type': 'application/json' } });
+ const ip = (req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim();
+ const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${Deno.env.get('RATE_LIMIT_SALT') || 'change-this-salt'}:${ip}`));
+ const hash = [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+ const sb = createClient(url, service);
+ const { data: limit, error: limitError } = await sb.rpc('check_submit_rate_limit', { p_ip_hash: hash });
+ if (limitError) return new Response(JSON.stringify({ error: 'Submission service unavailable' }), { status: 503, headers: { ...cors, 'Content-Type': 'application/json' } });
+ if (!limit?.allowed) return new Response(JSON.stringify({ error: 'Too many requests. Please try again later.' }), { status: 429, headers: { ...cors, 'Content-Type': 'application/json' } });
+ const payload = await req.json().catch(() => null);
+ if (!payload || typeof payload !== 'object') return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } });
+ const { data, error } = await sb.rpc('submit_lead', { p_payload: payload });
+ if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } });
+ return new Response(JSON.stringify(data), { status: 200, headers: { ...cors, 'Content-Type': 'application/json' } });
+});
