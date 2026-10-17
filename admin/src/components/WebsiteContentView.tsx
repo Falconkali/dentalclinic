@@ -160,7 +160,7 @@ export default function WebsiteContentView({
           <p>Update treatments, doctor profiles, pricing, testimonials, gallery, and clinic settings in real time.</p>
         </div>
         <a 
-          href="http://localhost:3000" 
+          href="/" 
           target="_blank" 
           rel="noreferrer" 
           className="secondary" 

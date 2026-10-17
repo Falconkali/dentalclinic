@@ -476,35 +476,37 @@ export default function AppointmentsView({ supabase, appointments, doctors, lead
       {viewMode === 'week' && (
         <div className="panel" style={{ padding: '20px' }}>
           <h3 style={{ margin: '0 0 16px', fontSize: '15px' }}>7-Day Rolling Clinic Calendar</h3>
-          <div className="week-grid">
-            {Array.from({ length: 7 }, (_, i) => {
-              const day = new Date();
-              day.setDate(day.getDate() + i);
-              const dayStr = day.toISOString().slice(0, 10);
-              const dayAppts = filtered.filter(a => a.starts_at.slice(0, 10) === dayStr);
+          <div className="calendar-scroll-wrap">
+            <div className="week-grid">
+              {Array.from({ length: 7 }, (_, i) => {
+                const day = new Date();
+                day.setDate(day.getDate() + i);
+                const dayStr = day.toISOString().slice(0, 10);
+                const dayAppts = filtered.filter(a => a.starts_at.slice(0, 10) === dayStr);
 
-              return (
-                <div key={dayStr} className="week-day-col">
-                  <div className="week-day-head">
-                    <span>{day.toLocaleDateString('en', { weekday: 'short' })}</span>
-                    <b>{day.getDate()}</b>
+                return (
+                  <div key={dayStr} className="week-day-col">
+                    <div className="week-day-head">
+                      <span>{day.toLocaleDateString('en', { weekday: 'short' })}</span>
+                      <b>{day.getDate()}</b>
+                    </div>
+                    <div className="week-day-body">
+                      {dayAppts.length === 0 ? (
+                        <small style={{ color: '#abb8b4', fontSize: '10px' }}>No visits</small>
+                      ) : (
+                        dayAppts.map(a => (
+                          <div key={a.id} className={`week-appt-pill s-${a.status}`} onClick={() => setSelectedAppt(a)}>
+                            <b>{new Date(a.starts_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</b>
+                            <span>{a.patient_name}</span>
+                            <small>{a.service}</small>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
-                  <div className="week-day-body">
-                    {dayAppts.length === 0 ? (
-                      <small style={{ color: '#abb8b4', fontSize: '10px' }}>No visits</small>
-                    ) : (
-                      dayAppts.map(a => (
-                        <div key={a.id} className={`week-appt-pill s-${a.status}`} onClick={() => setSelectedAppt(a)}>
-                          <b>{new Date(a.starts_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</b>
-                          <span>{a.patient_name}</span>
-                          <small>{a.service}</small>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -513,28 +515,30 @@ export default function AppointmentsView({ supabase, appointments, doctors, lead
       {viewMode === 'month' && (
         <div className="panel" style={{ padding: '20px' }}>
           <h3 style={{ margin: '0 0 16px', fontSize: '15px' }}>Monthly Overview</h3>
-          <div className="month-grid">
-            {Array.from({ length: 28 }, (_, i) => {
-              const d = new Date();
-              d.setDate(d.getDate() - d.getDay() + 1 + i);
-              const dStr = d.toISOString().slice(0, 10);
-              const dayAppts = filtered.filter(a => a.starts_at.slice(0, 10) === dStr);
+          <div className="calendar-scroll-wrap">
+            <div className="month-grid">
+              {Array.from({ length: 28 }, (_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - d.getDay() + 1 + i);
+                const dStr = d.toISOString().slice(0, 10);
+                const dayAppts = filtered.filter(a => a.starts_at.slice(0, 10) === dStr);
 
-              return (
-                <div key={dStr} className={`month-cell ${dStr === todayStr ? 'today' : ''}`} onClick={() => { setSelectedDate(dStr); setViewMode('day'); }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 600 }}>
-                    <span>{d.getDate()}</span>
-                    {dayAppts.length > 0 && <span className="month-badge">{dayAppts.length}</span>}
+                return (
+                  <div key={dStr} className={`month-cell ${dStr === todayStr ? 'today' : ''}`} onClick={() => { setSelectedDate(dStr); setViewMode('day'); }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 600 }}>
+                      <span>{d.getDate()}</span>
+                      {dayAppts.length > 0 && <span className="month-badge">{dayAppts.length}</span>}
+                    </div>
+                    <div className="month-cell-content">
+                      {dayAppts.slice(0, 2).map(a => (
+                        <div key={a.id} className="month-snippet">{a.patient_name}</div>
+                      ))}
+                      {dayAppts.length > 2 && <small style={{ fontSize: '9px', color: 'var(--teal)' }}>+{dayAppts.length - 2} more</small>}
+                    </div>
                   </div>
-                  <div className="month-cell-content">
-                    {dayAppts.slice(0, 2).map(a => (
-                      <div key={a.id} className="month-snippet">{a.patient_name}</div>
-                    ))}
-                    {dayAppts.length > 2 && <small style={{ fontSize: '9px', color: 'var(--teal)' }}>+{dayAppts.length - 2} more</small>}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

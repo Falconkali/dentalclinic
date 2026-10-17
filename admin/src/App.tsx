@@ -21,7 +21,10 @@ import {
   AlertCircle,
   Clock,
   CheckCircle2,
-  Calendar
+  Calendar,
+  Menu,
+  X,
+  ExternalLink
 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
 
@@ -78,6 +81,7 @@ export default function App() {
   const [filter, setFilter] = useState('all');
   const [showAddLead, setShowAddLead] = useState(false);
   const [dark, setDark] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
 
   // App Data States
@@ -430,13 +434,21 @@ export default function App() {
 
   return (
     <div className={dark ? 'app dark' : 'app'}>
-      <aside className="sidebar">
-        <a className="wordmark" href="#" onClick={e => { e.preventDefault(); setPage('overview'); }}>
-          <span className="mark">✳</span>
-          <span>
-            LUMIÈRE<small>DENTAL STUDIO</small>
-          </span>
-        </a>
+      {mobileMenuOpen && (
+        <div className="mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
+      )}
+      <aside className={'sidebar ' + (mobileMenuOpen ? 'mobile-open' : '')}>
+        <div className="sidebar-top-row">
+          <a className="wordmark" href="#" onClick={e => { e.preventDefault(); setPage('overview'); setMobileMenuOpen(false); }}>
+            <span className="mark">✳</span>
+            <span>
+              LUMIÈRE<small>DENTAL STUDIO</small>
+            </span>
+          </a>
+          <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
+            <X size={18} />
+          </button>
+        </div>
         <div className="workspace">
           <span className="avatar">LS</span>
           <span>
@@ -460,6 +472,7 @@ export default function App() {
               className={'nav-item ' + (page === n.id ? 'active' : '')}
               onClick={() => {
                 setPage(n.id);
+                setMobileMenuOpen(false);
                 if (n.id === 'followups') {
                   setFollowUpInitialData(null);
                 }
@@ -502,8 +515,13 @@ export default function App() {
 
       <main className="main">
         <header className="topbar">
-          <div className="breadcrumb">
-            Workspace <span>/</span> <b>{nav.find(n => n.id === page)?.label || page}</b>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button className="mobile-menu-trigger" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
+              <Menu size={18} />
+            </button>
+            <div className="breadcrumb">
+              Workspace <span>/</span> <b>{nav.find(n => n.id === page)?.label || page}</b>
+            </div>
           </div>
           <div className="top-actions">
             <div className="global-search">
@@ -521,15 +539,18 @@ export default function App() {
             <button className="icon-btn" onClick={load} aria-label="Refresh dashboard" title="Refresh data">
               <RefreshCw size={17} className={loading ? 'spin' : ''} />
             </button>
+            <button className="icon-btn mobile-only-btn" onClick={() => setDark(!dark)} title="Toggle theme">
+              <Moon size={16} />
+            </button>
             <a
-              href="http://localhost:3000"
+              href="/"
               target="_blank"
               rel="noreferrer"
-              className="secondary"
+              className="secondary view-site-btn"
               style={{ padding: '0.45rem 0.85rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
               title="Open public website in a new tab"
             >
-              <span>View Live Website</span> ↗
+              <span>Live Website</span> <ExternalLink size={13} />
             </a>
           </div>
         </header>
@@ -785,6 +806,43 @@ export default function App() {
           <span>HIPAA & Patient Privacy Standards</span>
         </footer>
       </main>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="mobile-bottom-nav">
+        <button className={'mobile-tab ' + (page === 'overview' ? 'active' : '')} onClick={() => setPage('overview')}>
+          <LayoutDashboard size={18} />
+          <span>Overview</span>
+        </button>
+        <button className={'mobile-tab ' + (page === 'appointments' ? 'active' : '')} onClick={() => setPage('appointments')}>
+          <CalendarDays size={18} />
+          <span>Appts</span>
+          {(todayAppts.length > 0 || scheduledAppts.length > 0) && (
+            <span className="mobile-badge">{todayAppts.length || scheduledAppts.length}</span>
+          )}
+        </button>
+        <button className={'mobile-tab ' + (page === 'followups' ? 'active' : '')} onClick={() => { setPage('followups'); setFollowUpInitialData(null); }}>
+          <Activity size={18} />
+          <span>Follow-up</span>
+          {overdueFollowUps.length > 0 && (
+            <span className="mobile-badge danger">{overdueFollowUps.length}</span>
+          )}
+        </button>
+        <button className={'mobile-tab ' + (page === 'leads' ? 'active' : '')} onClick={() => setPage('leads')}>
+          <Users size={18} />
+          <span>Leads</span>
+          {newCount > 0 && (
+            <span className="mobile-badge">{newCount}</span>
+          )}
+        </button>
+        <button className={'mobile-tab ' + (page === 'content' ? 'active' : '')} onClick={() => setPage('content')}>
+          <FileText size={18} />
+          <span>CMS</span>
+        </button>
+        <button className="mobile-tab" onClick={() => setMobileMenuOpen(true)}>
+          <Menu size={18} />
+          <span>More</span>
+        </button>
+      </nav>
 
       {showAddLead && (
         <div
