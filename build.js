@@ -13,7 +13,7 @@ if (fs.existsSync(distDir)) {
 fs.mkdirSync(distDir, { recursive: true });
 
 // Copy root static website files
-const rootFiles = ['index.html', 'style.css', 'script.js', 'clinic-api.js', 'README.md'];
+const rootFiles = ['index.html', 'style.css', 'script.js', 'clinic-api.js', 'README.md', 'robots.txt', 'sitemap.xml'];
 for (const file of rootFiles) {
   const src = path.join(__dirname, file);
   if (fs.existsSync(src)) {

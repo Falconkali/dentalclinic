@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import {
   Activity,
@@ -43,9 +43,9 @@ import {
   Lead
 } from './types';
 
-import AppointmentsView from './components/AppointmentsView';
-import FollowUpsView from './components/FollowUpsView';
-import WebsiteContentView from './components/WebsiteContentView';
+const AppointmentsView = lazy(() => import('./components/AppointmentsView'));
+const FollowUpsView = lazy(() => import('./components/FollowUpsView'));
+const WebsiteContentView = lazy(() => import('./components/WebsiteContentView'));
 
 const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined) || 'https://nczxzztlwveocdxphsmk.supabase.co';
 const anon = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jenh6enRsd3Zlb2NkeHBoc21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIyMjkxNzksImV4cCI6MjEwNzgwNTE3OX0.pH3KPev53H1f6PGpyab_CiP5Q-6Dw0FXkphTAJpvK2M';
@@ -738,65 +738,75 @@ export default function App() {
           </>
         )}
 
-        {page === 'appointments' && supabase && (
-          <AppointmentsView
-            supabase={supabase}
-            appointments={appointments}
-            doctors={doctors}
-            leads={leads}
-            onRefresh={load}
-            onOpenFollowUpWithPatient={info => {
-              setFollowUpInitialData(info);
-              setPage('followups');
-            }}
-          />
-        )}
+        <Suspense fallback={
+          <div className="placeholder-panel">
+            <div className="placeholder-icon">
+              <Activity size={24} />
+            </div>
+            <h2>Loading workspace…</h2>
+            <p>Syncing clinic data securely</p>
+          </div>
+        }>
+          {page === 'appointments' && supabase && (
+            <AppointmentsView
+              supabase={supabase}
+              appointments={appointments}
+              doctors={doctors}
+              leads={leads}
+              onRefresh={load}
+              onOpenFollowUpWithPatient={info => {
+                setFollowUpInitialData(info);
+                setPage('followups');
+              }}
+            />
+          )}
 
-        {page === 'followups' && supabase && (
-          <FollowUpsView
-            supabase={supabase}
-            followUps={followUps}
-            leads={leads}
-            profiles={profiles}
-            currentUserId={session?.user?.id}
-            onRefresh={load}
-            initialNewData={followUpInitialData}
-            onClearInitialData={() => setFollowUpInitialData(null)}
-          />
-        )}
+          {page === 'followups' && supabase && (
+            <FollowUpsView
+              supabase={supabase}
+              followUps={followUps}
+              leads={leads}
+              profiles={profiles}
+              currentUserId={session?.user?.id}
+              onRefresh={load}
+              initialNewData={followUpInitialData}
+              onClearInitialData={() => setFollowUpInitialData(null)}
+            />
+          )}
 
-        {page === 'content' && supabase && (
-          <WebsiteContentView
-            supabase={supabase}
-            services={services}
-            doctors={doctors}
-            pricingPlans={pricingPlans}
-            testimonials={testimonials}
-            galleryCases={galleryCases}
-            faqs={faqs}
-            blogPosts={blogPosts}
-            settings={settings}
-            onRefresh={load}
-            initialTab="services"
-          />
-        )}
+          {page === 'content' && supabase && (
+            <WebsiteContentView
+              supabase={supabase}
+              services={services}
+              doctors={doctors}
+              pricingPlans={pricingPlans}
+              testimonials={testimonials}
+              galleryCases={galleryCases}
+              faqs={faqs}
+              blogPosts={blogPosts}
+              settings={settings}
+              onRefresh={load}
+              initialTab="services"
+            />
+          )}
 
-        {page === 'settings' && supabase && (
-          <WebsiteContentView
-            key="settings-view"
-            supabase={supabase}
-            services={services}
-            doctors={doctors}
-            pricingPlans={pricingPlans}
-            testimonials={testimonials}
-            galleryCases={galleryCases}
-            faqs={faqs}
-            blogPosts={blogPosts}
-            settings={settings}
-            onRefresh={load}
-            initialTab="settings"
-          />
-        )}
+          {page === 'settings' && supabase && (
+            <WebsiteContentView
+              key="settings-view"
+              supabase={supabase}
+              services={services}
+              doctors={doctors}
+              pricingPlans={pricingPlans}
+              testimonials={testimonials}
+              galleryCases={galleryCases}
+              faqs={faqs}
+              blogPosts={blogPosts}
+              settings={settings}
+              onRefresh={load}
+              initialTab="settings"
+            />
+          )}
+        </Suspense>
 
         <footer className="app-footer">
           <span>© {new Date().getFullYear()} Lumière Dental Studio</span>
