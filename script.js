@@ -284,6 +284,11 @@
   date.addEventListener('change', () => {
     date.setCustomValidity(date.value && new Date(date.value + 'T00:00:00').getDay() === 0 ? 'Please choose Monday to Saturday. Sundays are emergency enquiries.' : '');
   });
+  date.addEventListener('click', () => {
+    if (typeof date.showPicker === 'function') {
+      try { date.showPicker(); } catch (e) {}
+    }
+  });
 
   $$('[data-time]').forEach(b => b.addEventListener('click', () => {
     chosenTime = b.dataset.time;
