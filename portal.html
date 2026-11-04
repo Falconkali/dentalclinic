@@ -210,22 +210,24 @@
         <div class="cards-grid" id="bookingsCards"></div>
 
         <!-- Spreadsheet Table (Toggleable) -->
-        <table class="portal-table" id="bookingsTable" hidden>
-          <thead>
-            <tr>
-              <th>Patient</th>
-              <th>Contact</th>
-              <th>Service & Plan</th>
-              <th>Date & Time</th>
-              <th>Status</th>
-              <th>Notes / Message</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="bookingsTbody">
-            <!-- Rendered dynamically -->
-          </tbody>
-        </table>
+        <div class="portal-table-wrapper" id="portalTableWrapper">
+          <table class="portal-table" id="bookingsTable" hidden>
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Contact</th>
+                <th>Service & Plan</th>
+                <th>Date & Time</th>
+                <th>Status</th>
+                <th>Notes / Message</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTbody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
 
         <!-- Empty state placeholder -->
         <div class="empty-state" id="emptyState" hidden>
