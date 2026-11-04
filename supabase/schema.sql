@@ -1,4 +1,10 @@
--- Lumière Dental Studio — Supabase schema
+-- ==============================================================================
+-- LEGACY MONOLITHIC SCHEMA ARCHIVE (REFERENCE ONLY)
+-- DO NOT USE FOR NEW DEPLOYMENTS.
+-- The authoritative, version-controlled database migrations are in: supabase/migrations/
+-- 001_initial_schema.sql, 002_staff_profiles.sql, 003_row_level_security.sql, 004_database_functions.sql
+-- ==============================================================================
+-- Lumière Dental Studio — Supabase schema (Archived)
 -- Run in a NEW Supabase project. Review demo seed content and replace it before production.
 create extension if not exists pgcrypto;
 create extension if not exists btree_gist;
@@ -95,7 +101,7 @@ create policy "admin reception manage appointments" on public.appointments for a
 create policy "staff manage followups" on public.follow_ups for all to authenticated using (public.current_staff_role() in ('admin','receptionist') or assigned_to=auth.uid()) with check (public.current_staff_role() in ('admin','receptionist') or assigned_to=auth.uid());
 create policy "staff manage subscribers" on public.subscribers for all to authenticated using (public.current_staff_role() in ('admin','receptionist')) with check (public.current_staff_role() in ('admin','receptionist'));
 -- Published content read by anyone; staff manage, admin/receptionist only
- do $$ declare t text; begin foreach t in array array['services','doctors','pricing_plans','testimonials','gallery_cases','faqs'] loop execute format('create policy %I on public.%I for select to anon, authenticated using (is_published or public.is_staff())',t||'_public_read',t); execute format('create policy %I on public.%I for all to authenticated using (public.current_staff_role() in (''admin'',''receptionist'')) with check (public.current_staff_role() in (''admin'',''receptionist''))',t||'_staff_manage',t); end loop; end $$;
+ do $$ declare t text; begin foreach t in array array['services','doctors','pricing_plans','testimonials','gallery_cases','faqs'] loop execute format('create policy %I on public.%I for select to anon, authenticated using (is_published or public.is_staff())',t||'_public_read',t); execute format('create policy %I on public.%I for all to authenticated using (public.current_staff_role() in (''admin'',''receptionist'')) with check (public.current_staff_role() in (''admin'',''receptionist''))',t||'_staff_manage'); end loop; end $$;
 create policy "admin manage site settings" on public.site_settings for all to authenticated using (public.current_staff_role()='admin') with check (public.current_staff_role()='admin');
 create policy "staff read templates" on public.message_templates for select to authenticated using (public.current_staff_role() in ('admin','receptionist'));
 create policy "admin manage templates" on public.message_templates for all to authenticated using (public.current_staff_role()='admin') with check (public.current_staff_role()='admin');

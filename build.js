@@ -12,8 +12,21 @@ if (fs.existsSync(distDir)) {
 }
 fs.mkdirSync(distDir, { recursive: true });
 
-// Copy root static website files
-const rootFiles = ['index.html', 'style.css', 'script.js', 'clinic-api.js', 'README.md', 'robots.txt', 'sitemap.xml'];
+// Copy root static website and staff portal files
+const rootFiles = [
+  'index.html',
+  'style.css',
+  'script.js',
+  'clinic-api.js',
+  'clinic.config.js',
+  'portal.html',
+  'portal.css',
+  'portal.js',
+  'README.md',
+  'robots.txt',
+  'sitemap.xml'
+];
+
 for (const file of rootFiles) {
   const src = path.join(__dirname, file);
   if (fs.existsSync(src)) {
@@ -33,4 +46,4 @@ if (fs.existsSync(adminDist)) {
   process.exit(1);
 }
 
-console.log('===> Build completed successfully! Unified website & admin ready in dist/');
+console.log('===> Build completed successfully! Unified website, staff portal & admin ready in dist/');

@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0A1F22">
+  <title>Lumière Dental Studio — Staff Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="portal.css">
+  <script src="clinic.config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="clinic-api.js"></script>
+</head>
+<body class="portal-body">
+  <!-- Genuine Supabase Staff Authentication Gate -->
+  <div class="portal-lock" id="portalLock">
+    <div class="lock-card">
+      <span class="tooth">♧</span>
+      <span class="portal-badge" style="margin-bottom:12px;display:inline-block;">CLINICAL ACCESS GATE</span>
+      <h2>Staff Sign In</h2>
+      <p class="lock-subtitle">Enter your studio credentials to access patient rosters, appointments and clinical records.</p>
+      
+      <form id="loginForm" novalidate>
+        <div class="auth-form-fields">
+          <div class="auth-field-group">
+            <label for="loginEmail">Staff Email</label>
+            <input type="email" id="loginEmail" placeholder="e.g. admin@lumieredental.example" autocomplete="username" required>
+          </div>
+          <div class="auth-field-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••••••" autocomplete="current-password" required>
+          </div>
+          <p class="error" id="loginError" style="margin:4px 0 0;font-size:11px;"></p>
+          <button type="submit" class="btn coral auth-submit-btn" id="btnLoginSubmit">
+            Sign In to Portal <span>↗</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="auth-security-notice" style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);font-size:10px;color:#7e968f;line-height:1.6;text-align:center;">
+        🔒 <strong>Authorized Staff Only</strong><br>
+        Role-based permissions (Admin, Reception, Doctor) are enforced via Supabase Auth & Postgres RLS.
+      </div>
+    </div>
+  </div>
+
+  <!-- Portal Header -->
+  <header class="portal-header" id="portalHeader">
+    <div class="portal-brand-wrap">
+      <a class="brand" href="portal.html">
+        <span class="tooth">♧</span>
+        <span><b>LUMIÈRE</b><small>STAFF PORTAL</small></span>
+      </a>
+      <span class="role-badge role-admin" id="userRoleBadge">STAFF</span>
+    </div>
+
+    <div class="portal-header-center">
+      <div class="live-clock" id="liveClock">
+        <span class="pulse-dot"></span>
+        <span id="clockText">Loading time...</span>
+      </div>
+    </div>
+
+    <div class="portal-header-actions">
+      <div class="portal-user-wrap" id="portalUserWrap">
+        <div class="user-identity">
+          <span class="user-name-text" id="userNameDisplay">Staff Member</span>
+          <span class="user-role-text" id="userEmailDisplay">staff@lumieredental.example</span>
+        </div>
+      </div>
+      <button class="btn ghost-light small" id="btnStaffDirectory" hidden title="View Clinic Staff Roster">
+        Staff Directory ↗
+      </button>
+      <button class="btn ghost-light small" id="btnNotificationOutbox" hidden title="Inspect and process notification delivery outbox">
+        Outbox Queue ↗
+      </button>
+      <button class="btn ghost-light small" id="btnLogout" title="Sign out of staff session">
+        Sign Out ↗
+      </button>
+      <a class="btn outline-light" href="index.html" target="_blank" title="Open patient-facing website">
+        Patient Site <span>↗</span>
+      </a>
+      <button class="btn coral" id="openNewBookingModal">
+        + Walk-in / Phone Booking <span>↗</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="portal-main">
+    <!-- Doctor Specific Roster Notice -->
+    <div class="doctor-filter-banner" id="doctorBanner" hidden style="background:rgba(31,166,160,0.15);border:1px solid rgba(31,166,160,0.3);padding:12px 18px;border-radius:12px;margin-bottom:20px;font-size:11px;color:#8ceae5;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">🩺</span>
+      <div>
+        <strong>Doctor View:</strong> Showing appointments assigned to <span id="doctorNameDisplay" style="color:white;font-weight:700;">Dr. Ananya Rao</span>. Clinical notes can be edited directly below.
+      </div>
+    </div>
+
+    <!-- Rookie / Receptionist Friendly Helper Banner -->
+    <section class="rookie-banner" id="rookieBanner">
+      <div class="rookie-banner-content">
+        <span class="rookie-emoji">💡</span>
+        <div>
+          <strong>Receptionist Quick Guide:</strong>
+          <span>When a patient requests a visit on the website, they show up under <b style="color:var(--gold)">🟡 Needs Action</b>. Click <b style="color:var(--mint)">✓ Confirm & WhatsApp</b> to lock in their slot and send them an instant confirmation message!</span>
+        </div>
+      </div>
+      <button class="rookie-dismiss" id="dismissBanner" title="Hide this tip">✕ Got it</button>
+    </section>
+
+    <!-- Top Stats Row -->
+    <section class="portal-stats-grid">
+      <div class="stat-card">
+        <span class="stat-kicker">TOTAL REQUESTS</span>
+        <div class="stat-value-wrap">
+          <strong id="statTotal">0</strong>
+          <span class="stat-icon">▦</span>
+        </div>
+        <small class="stat-desc">All appointment inquiries</small>
+      </div>
+
+      <div class="stat-card highlight-gold">
+        <span class="stat-kicker">PENDING REVIEW</span>
+        <div class="stat-value-wrap">
+          <strong id="statPending">0</strong>
+          <span class="stat-icon">⏳</span>
+        </div>
+        <small class="stat-desc">Awaiting staff confirmation</small>
+      </div>
+
+      <div class="stat-card highlight-mint">
+        <span class="stat-kicker">CONFIRMED VISITS</span>
+        <div class="stat-value-wrap">
+          <strong id="statConfirmed">0</strong>
+          <span class="stat-icon">✓</span>
+        </div>
+        <small class="stat-desc">Scheduled on calendar</small>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-kicker">TODAY'S CLINIC</span>
+        <div class="stat-value-wrap">
+          <strong id="statToday">0</strong>
+          <span class="stat-icon">☼</span>
+        </div>
+        <small class="stat-desc" id="todayDateLabel">Today</small>
+      </div>
+    </section>
+
+    <!-- Content Workspace -->
+    <section class="portal-workspace">
+      <!-- Toolbar: Filters, search, actions -->
+      <div class="workspace-toolbar">
+        <div class="workspace-top-bar">
+          <div class="filter-tabs" id="statusTabs">
+            <button class="tab-btn active" data-status="all">All <span class="tab-count" id="countAll">0</span></button>
+            <button class="tab-btn" data-status="Pending">🟡 Needs Action <span class="tab-count" id="countPending">0</span></button>
+            <button class="tab-btn" data-status="Confirmed">🟢 Confirmed <span class="tab-count" id="countConfirmed">0</span></button>
+            <button class="tab-btn" data-status="Completed">🔵 Completed <span class="tab-count" id="countCompleted">0</span></button>
+            <button class="tab-btn" data-status="Cancelled">⚪ Cancelled <span class="tab-count" id="countCancelled">0</span></button>
+          </div>
+
+          <div class="view-switch-wrap">
+            <button class="view-toggle-btn active" id="viewCardsBtn" title="Friendly Patient Cards View">
+              📋 Patient Cards
+            </button>
+            <button class="view-toggle-btn" id="viewTableBtn" title="Detailed Spreadsheet View">
+              ▦ Spreadsheet
+            </button>
+          </div>
+        </div>
+
+        <div class="toolbar-controls">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search patient name, phone, or service...">
+            <button class="clear-search" id="clearSearch" hidden>×</button>
+          </div>
+
+          <div class="select-box">
+            <select id="serviceFilter" aria-label="Filter by service">
+              <option value="all">All Services</option>
+              <option value="General dentistry">General Dentistry</option>
+              <option value="Teeth whitening">Teeth Whitening</option>
+              <option value="Clear aligners">Clear Aligners</option>
+              <option value="Dental implants">Dental Implants</option>
+              <option value="Veneers & smile makeover">Veneers & Makeover</option>
+              <option value="Root canal">Root Canal</option>
+              <option value="Pediatric dentistry">Pediatric Dentistry</option>
+              <option value="Emergency care">Emergency Care</option>
+            </select>
+          </div>
+
+          <div class="toolbar-actions">
+            <button class="btn ghost-light small" id="btnRefresh" title="Refresh appointments from Supabase cloud">
+              🔄 Sync
+            </button>
+            <button class="btn ghost-light small" id="btnExport" title="Export requests to CSV">
+              ⬇ Export CSV
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bookings Content: Cards + Table -->
+      <div class="table-container">
+        <!-- Friendly Patient Cards Grid (Default) -->
+        <div class="cards-grid" id="bookingsCards"></div>
+
+        <!-- Spreadsheet Table (Toggleable) -->
+        <table class="portal-table" id="bookingsTable" hidden>
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Contact</th>
+              <th>Service & Plan</th>
+              <th>Date & Time</th>
+              <th>Status</th>
+              <th>Notes / Message</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTbody">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+
+        <!-- Empty state placeholder -->
+        <div class="empty-state" id="emptyState" hidden>
+          <div class="empty-icon">♧</div>
+          <h3>No appointment requests found</h3>
+          <p id="emptyMessage">Requests booked by patients through the website will appear here in real time.</p>
+          <div class="empty-actions">
+            <button class="btn coral" id="emptyCreateBtn">+ Add Walk-in Patient ↗</button>
+            <button class="btn outline-light" id="emptyRefreshBtn">🔄 Refresh Cloud</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Walk-in / New Appointment -->
+  <div class="modal" id="newBookingModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalHeading">
+    <div class="modal-box portal-modal-box">
+      <button class="close" id="closeNewBookingModal" aria-label="Close modal">×</button>
+      <span class="eyebrow">RECEPTION DESK</span>
+      <h2 id="modalHeading">New Appointment Request</h2>
+      <p>Log a patient walk-in, phone call, or reception desk booking into the studio roster.</p>
+
+      <form id="newBookingForm" novalidate>
+        <div class="form-grid">
+          <label class="portal-label">
+            <span>Patient Full Name *</span>
+            <input type="text" id="modalName" required placeholder="e.g. Aditi Sharma">
+          </label>
+
+          <label class="portal-label">
+            <span>Phone Number *</span>
+            <input type="tel" id="modalPhone" required placeholder="e.g. +91 98765 12345">
+          </label>
+
+          <label class="portal-label">
+            <span>Email Address (Optional)</span>
+            <input type="email" id="modalEmail" placeholder="e.g. patient@example.com">
+          </label>
+
+          <label class="portal-label">
+            <span>Service Required *</span>
+            <select id="modalService" required>
+              <option value="General dentistry">General dentistry</option>
+              <option value="Teeth whitening">Teeth whitening</option>
+              <option value="Clear aligners">Clear aligners</option>
+              <option value="Dental implants">Dental implants</option>
+              <option value="Veneers & smile makeover">Veneers & smile makeover</option>
+              <option value="Root canal">Root canal</option>
+              <option value="Pediatric dentistry">Pediatric dentistry</option>
+              <option value="Emergency care">Emergency care</option>
+            </select>
+          </label>
+
+          <label class="portal-label">
+            <span>Care Package / Tier</span>
+            <select id="modalPlan">
+              <option value="">No package selected</option>
+              <option value="Essential Care">Essential Care (₹799)</option>
+              <option value="Smile Refresh">Smile Refresh (₹2,499)</option>
+              <option value="Total Makeover">Total Makeover (Custom quote)</option>
+            </select>
+          </label>
+
+          <label class="portal-label">
+            <span>Preferred Date *</span>
+            <input type="date" id="modalDate" required>
+          </label>
+
+          <label class="portal-label">
+            <span>Preferred Slot *</span>
+            <select id="modalTime" required>
+              <option value="10:00 AM">10:00 AM</option>
+              <option value="12:00 PM">12:00 PM</option>
+              <option value="3:00 PM">3:00 PM</option>
+              <option value="5:00 PM">5:00 PM</option>
+            </select>
+          </label>
+
+          <label class="portal-label">
+            <span>Initial Status</span>
+            <select id="modalStatus">
+              <option value="Confirmed">Confirmed</option>
+              <option value="Pending">Pending</option>
+            </select>
+          </label>
+
+          <label class="portal-label">
+            <span>Assign Doctor</span>
+            <select id="modalDoctor">
+              <option value="">Unassigned</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="portal-label full-width">
+          <span>Clinical or Reception Notes</span>
+          <textarea id="modalMessage" rows="3" placeholder="Patient concerns, medical flags, previous clinic history..."></textarea>
+        </label>
+
+        <p class="error" id="modalError"></p>
+
+        <div class="modal-actions">
+          <button type="button" class="btn outline" id="cancelModal">Cancel</button>
+          <button type="submit" class="btn coral">Save Appointment <span>↗</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Status & Notes -->
+  <div class="modal" id="editModal" hidden role="dialog" aria-modal="true" aria-labelledby="editHeading">
+    <div class="modal-box portal-modal-box">
+      <button class="close" id="closeEditModal" aria-label="Close modal">×</button>
+      <span class="eyebrow">UPDATE RECORD</span>
+      <h2 id="editHeading">Appointment Details</h2>
+
+      <div class="edit-summary" id="editSummary"></div>
+
+      <form id="editForm">
+        <input type="hidden" id="editIndex">
+        <div class="form-grid">
+          <label class="portal-label">
+            <span>Status</span>
+            <select id="editStatus">
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </label>
+
+          <label class="portal-label">
+            <span>Assigned Doctor</span>
+            <select id="editDoctor">
+              <option value="Unassigned">Unassigned</option>
+              <option value="Dr. Ananya Rao">Dr. Ananya Rao (Lead Dentist)</option>
+              <option value="Dr. Kabir Mehta">Dr. Kabir Mehta (Cosmetic)</option>
+              <option value="Dr. Meera Nair">Dr. Meera Nair (Family / Pediatric)</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="portal-label full-width">
+          <span>Staff Clinical Notes</span>
+          <textarea id="editStaffNotes" rows="3" placeholder="Add receptionist or doctor notes here..."></textarea>
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="btn outline" id="cancelEditModal">Close</button>
+          <button type="submit" class="btn coral">Update Record <span>↗</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: WhatsApp Appointment Confirmation -->
+  <div class="modal" id="waConfirmModal" hidden role="dialog" aria-modal="true" aria-labelledby="waConfirmHeading">
+    <div class="modal-box portal-modal-box">
+      <button class="close" id="closeWaModal" aria-label="Close modal">×</button>
+      <span class="eyebrow">PATIENT CONFIRMATION</span>
+      <h2 id="waConfirmHeading">Confirm & Notify Patient</h2>
+      <p>Appointment confirmed in studio roster. Send confirmation directly to the patient via WhatsApp.</p>
+
+      <div class="edit-summary" id="waSummary"></div>
+
+      <label class="portal-label full-width">
+        <span>Personalized WhatsApp Message</span>
+        <textarea id="waMessageText" rows="4" style="font-size:10px;line-height:1.6;"></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="btn outline" id="skipWaBtn">Done (Skip WhatsApp)</button>
+        <a class="btn coral" id="sendWaBtn" href="#" target="_blank" rel="noreferrer">
+          Open WhatsApp <span>💬</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin-Only Staff Directory Modal -->
+  <div class="modal-backdrop" id="staffModal" hidden>
+    <div class="portal-modal" style="max-width: 650px;">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">ADMINISTRATIVE ACCESS</span>
+          <h3>Clinic Staff Directory</h3>
+        </div>
+        <button class="modal-close" id="closeStaffModal" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 11px; color: var(--muted); margin-bottom: 16px;">
+          Review active clinical staff, adjust roles, and manage access permissions. New staff are invited via the Supabase Auth Dashboard; they appear here for activation and role assignment.
+        </p>
+        <div id="staffListContainer" style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 11px; color: var(--muted);">Loading staff roster...</div>
+        </div>
+        <div style="margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; font-size: 10px; color: var(--muted);">
+          <strong>Staff Provisioning Guide:</strong> To invite a new doctor or receptionist, send an invitation in <em>Supabase Dashboard → Authentication → Users</em>. Once the user accepts, their account appears above for activation.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin-Only Notification Outbox Modal -->
+  <div class="modal-backdrop" id="outboxModal" hidden>
+    <div class="portal-modal" style="max-width: 720px;">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">RELIABLE NOTIFICATION PIPELINE</span>
+          <h3>Notification Outbox & Queue</h3>
+        </div>
+        <button class="modal-close" id="closeOutboxModal" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 11px; color: var(--muted); margin-bottom: 16px;">
+          Inspect queued booking email notifications, delivery attempts, and retry schedules. Process pending or failed entries on demand.
+        </p>
+        <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+          <button class="btn coral small" id="btnProcessOutboxNow">Process Queue / Retry Failed ↗</button>
+          <button class="btn ghost-light small" id="btnRefreshOutbox">Refresh Status ⟳</button>
+        </div>
+        <div id="outboxListContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 350px; overflow-y: auto;">
+          <div style="font-size: 11px; color: var(--muted);">Loading outbox entries...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="portal.js"></script>
+</body>
+</html>

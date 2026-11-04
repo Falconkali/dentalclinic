@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
-    "start": "npx --yes serve dist -l 3000"
+    "start": "node server.js"
   },
   "keywords": [
     "dental",

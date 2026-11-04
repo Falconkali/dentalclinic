@@ -1,0 +1,14 @@
+# Supabase CLI Project Configuration
+# Configures per-function JWT verification and project settings
+
+[functions.on-new-lead]
+verify_jwt = false
+
+[functions.process-notification-outbox]
+verify_jwt = false
+
+[functions.submit-lead-rate-limit]
+verify_jwt = true
+
+[functions.subscribe-newsletter]
+verify_jwt = true
