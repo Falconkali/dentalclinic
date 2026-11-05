@@ -97,8 +97,9 @@ h1, h2, h3, h4 {
 }
 
 h1 {
-  font-size: clamp(2.75rem, 6.5vw, 5.5rem);
+  font-size: clamp(2.1rem, 5.8vw, 5.5rem);
   font-weight: 400;
+  overflow-wrap: break-word;
 }
 
 h2 {
@@ -842,6 +843,10 @@ img {
 }
 
 @media (max-width: 768px) {
+  .hero-title {
+    font-size: clamp(2.2rem, 8.5vw, 2.9rem);
+    line-height: 1.12;
+  }
   .nav-links, .nav-actions {
     display: none;
   }
