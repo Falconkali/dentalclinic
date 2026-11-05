@@ -15,5 +15,9 @@
     "supabase"
   ],
   "author": "Lumière Dental Studio",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.119.0",
+    "dotenv": "^18.0.9"
+  }
 }

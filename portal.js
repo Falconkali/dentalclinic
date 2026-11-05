@@ -391,7 +391,7 @@
     }
 
     realtimeUnsubscribe = window.ClinicAPI.subscribeRealtime((payload) => {
-      console.log('Realtime change received:', payload);
+      console.log('Realtime update received:', payload?.eventType, payload?.table);
       toast('🔔 Live update received from studio database!');
       loadAppointmentsFromCloud();
     });

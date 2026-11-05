@@ -203,7 +203,7 @@ window.CLINIC_CONFIG = {
   seo: {
     title: "Lumière Dental Studio — Smile design, refined.",
     description: "Modern, thoughtful dentistry for confident smiles. Book a consultation with Lumière Dental Studio.",
-    siteUrl: "http://localhost:3000"
+    siteUrl: (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') ? window.location.origin : "https://dentalclinic-lumiere.vercel.app"
   },
 
   integrations: {
