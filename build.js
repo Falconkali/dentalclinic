@@ -22,6 +22,7 @@ const rootFiles = [
   'portal.html',
   'portal.css',
   'portal.js',
+  'design-preview.html',
   'README.md',
   'robots.txt',
   'sitemap.xml'
@@ -33,6 +34,14 @@ for (const file of rootFiles) {
     fs.copyFileSync(src, path.join(distDir, file));
     console.log(`Copied ${file} -> dist/${file}`);
   }
+}
+
+// Copy V2 preview directory if present
+const v2Dir = path.join(__dirname, 'lumiere-premium-v2');
+const v2Dest = path.join(distDir, 'lumiere-premium-v2');
+if (fs.existsSync(v2Dir)) {
+  fs.cpSync(v2Dir, v2Dest, { recursive: true });
+  console.log('Copied lumiere-premium-v2/ -> dist/lumiere-premium-v2/');
 }
 
 // Copy built admin dist to dist/admin

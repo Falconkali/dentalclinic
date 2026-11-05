@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lumière Dental Studio — Design Preview & Comparison Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --canvas: #F5F3ED;
+      --surface: #FFFFFF;
+      --text: #242620;
+      --muted: #696D62;
+      --border: #E2DDD3;
+      --olive: #777F68;
+      --terracotta: #B86C52;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Manrope', -apple-system, sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--canvas);
+      color: var(--text);
+      line-height: 1.6;
+      padding: clamp(24px, 5vw, 64px) 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .preview-container {
+      max-width: 1080px;
+      width: 100%;
+    }
+    .preview-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .preview-badge {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--olive);
+      display: inline-block;
+      margin-bottom: 12px;
+      background-color: rgba(119, 127, 104, 0.12);
+      padding: 4px 12px;
+      border-radius: 9999px;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--terracotta);
+    }
+    .preview-desc {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .notice-box {
+      background-color: #FAF9F6;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--olive);
+      padding: 16px 20px;
+      border-radius: 6px;
+      margin-bottom: 40px;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .notice-box strong {
+      color: var(--olive);
+    }
+    .grid-versions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+    @media (max-width: 768px) {
+      .grid-versions {
+        grid-template-columns: 1fr;
+      }
+    }
+    .version-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 4px 20px rgba(36, 38, 32, 0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .version-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+    .tag-v11 { color: #586B75; }
+    .tag-v2 { color: var(--terracotta); }
+    .version-title {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .version-meta {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .version-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: auto;
+    }
+    .btn-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background-color: var(--canvas);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+    .btn-link:hover {
+      background-color: var(--text);
+      color: #FFFFFF;
+      border-color: var(--text);
+      transform: translateY(-1px);
+    }
+    .btn-link span {
+      font-size: 1.1rem;
+    }
+    .footer-note {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-container">
+    <div class="preview-header">
+      <span class="preview-badge">Design Evaluation &amp; Rollback Hub</span>
+      <h1>Lumière Dental Studio — <em>Design Preview</em></h1>
+      <p class="preview-desc">Compare the active production platform (V11) with the redesigned luxury concept (V2). Both versions operate side-by-side with guaranteed non-destructive rollback.</p>
+    </div>
+
+    <div class="notice-box">
+      <strong>Active Production Safeguard:</strong> The current V11 design remains active at the main production URLs. V2 is an isolated preview running in parallel. No production files will be modified or replaced without explicit approval.
+    </div>
+
+    <div class="grid-versions">
+      <!-- Original V11 Card -->
+      <div class="version-card">
+        <div>
+          <span class="version-tag tag-v11">Active Production Release</span>
+          <h2 class="version-title">Original V11 Design</h2>
+          <p class="version-meta">Dark luxury aesthetic (#08191B canvas, porcelain typography, mint and gold highlights). Fully verified, tested, and actively deployed.</p>
+        </div>
+        <div class="version-links">
+          <a class="btn-link" href="index.html">
+            <span>Public Website (V11)</span>
+            <span>↗</span>
+          </a>
+          <a class="btn-link" href="portal.html">
+            <span>Staff Portal CRM (V11)</span>
+            <span>↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Redesigned V2 Card -->
+      <div class="version-card" style="border-color: #D3CEBF; box-shadow: 0 8px 30px rgba(184, 108, 82, 0.08);">
+        <div>
+          <span class="version-tag tag-v2">New Creative Direction</span>
+          <h2 class="version-title">Premium Design V2</h2>
+          <p class="version-meta">Warm ivory canvas (#F5F3ED), editorial Cormorant Garamond serif typography, Linear-inspired clean light staff CRM, and asymmetrical spatial composition.</p>
+        </div>
+        <div class="version-links">
+          <a class="btn-link" href="lumiere-premium-v2/index.html" style="background-color: var(--olive); color:#FFFFFF; border-color:var(--olive);">
+            <span>Preview Redesigned Website (V2)</span>
+            <span>↗</span>
+          </a>
+          <a class="btn-link" href="lumiere-premium-v2/portal.html" style="background-color: var(--text); color:#FFFFFF; border-color:var(--text);">
+            <span>Preview Redesigned Staff CRM (V2)</span>
+            <span>↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Lumière Dental Studio · Non-destructive multi-version preview architecture · Commit: v11-production-baseline
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F5F4F0">
+  <title>Lumière Dental Studio — Clinical CRM & Staff Portal V2</title>
+
+  <!-- Typography: Cormorant Garamond, Manrope, IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="portal.css">
+  
+  <!-- Central Config & Backend API Contracts (Unmodified V11) -->
+  <script src="../clinic.config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../clinic-api.js"></script>
+</head>
+<body>
+  <!-- 1. Supabase Staff Authentication Gate -->
+  <div class="modal-backdrop active" id="portalLock" style="background-color:var(--portal-bg);">
+    <div class="modal-sheet" style="max-width:440px;text-align:center;box-shadow:var(--shadow-card);">
+      <div style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--portal-olive);margin-bottom:8px;font-weight:600;">
+        CLINICAL ACCESS GATE
+      </div>
+      <h2 style="font-family:var(--font-serif);font-size:2.2rem;margin-bottom:8px;font-weight:400;">Staff Sign In</h2>
+      <p style="font-size:0.85rem;color:var(--portal-muted);margin-bottom:28px;">
+        Enter your studio credentials to access patient rosters, appointments and clinical records.
+      </p>
+
+      <form id="loginForm" novalidate style="text-align:left;">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div>
+            <label for="loginEmail" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--portal-text);display:block;margin-bottom:6px;">Staff Email</label>
+            <input type="email" id="loginEmail" placeholder="admin@lumieredental.example" autocomplete="username" required style="width:100%;padding:12px 14px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:var(--font-sans);">
+          </div>
+          <div>
+            <label for="loginPassword" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--portal-text);display:block;margin-bottom:6px;">Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••••••" autocomplete="current-password" required style="width:100%;padding:12px 14px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:var(--font-sans);">
+          </div>
+          <p id="loginError" style="font-size:0.78rem;color:var(--status-cancelled-text);display:none;"></p>
+          <button type="submit" class="crm-btn crm-btn-primary" id="btnLoginSubmit" style="width:100%;padding:14px;margin-top:8px;">
+            Sign In to CRM <span>↗</span>
+          </button>
+        </div>
+      </form>
+
+      <div style="margin-top:28px;padding-top:16px;border-top:1px solid var(--portal-border);font-size:0.75rem;color:var(--portal-muted);line-height:1.6;">
+        🔒 <strong>Authorized Staff Only</strong><br>
+        Role-based permissions (Admin, Reception, Doctor) enforced via Supabase Auth &amp; PostgreSQL RLS.
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Portal Header Navigation -->
+  <header class="portal-header" id="portalHeader">
+    <div class="portal-nav-bar">
+      <div class="portal-brand">
+        <a href="portal.html" class="portal-logo" style="text-decoration:none;">
+          <span id="portalBrandName">LUMIÈRE</span> <span style="font-size:0.85rem;font-weight:400;color:var(--portal-muted);">CRM</span>
+        </a>
+        <span class="portal-badge" id="userRoleBadge">STAFF</span>
+        <div style="display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:0.72rem;color:var(--portal-muted);" id="liveClock">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:var(--portal-olive);"></span>
+          <span id="clockText">Live</span>
+        </div>
+      </div>
+
+      <div class="portal-actions">
+        <div class="user-pill" id="portalUserWrap">
+          <span style="font-weight:600;" id="userNameDisplay">Staff Member</span>
+          <span style="color:var(--portal-muted);" id="userEmailDisplay">staff@example.com</span>
+        </div>
+
+        <button class="crm-btn crm-btn-secondary" id="btnStaffDirectory" hidden title="View Clinic Staff Roster">
+          Staff Roster
+        </button>
+        <button class="crm-btn crm-btn-secondary" id="btnNotificationOutbox" hidden title="Inspect and process notification delivery outbox">
+          Outbox Queue
+        </button>
+        <button class="crm-btn crm-btn-primary" id="openNewBookingModal">
+          + New Booking
+        </button>
+        <a class="crm-btn crm-btn-ghost" href="index.html" target="_blank" title="Open patient-facing website">
+          Website ↗
+        </a>
+        <button class="crm-btn crm-btn-ghost" id="btnLogout" title="Sign out of staff session">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. Main Portal CRM Dashboard -->
+  <main class="portal-container" id="portalMain" style="display:none;">
+    <!-- Doctor Specific Roster Notice -->
+    <div id="doctorBanner" hidden style="background-color:var(--portal-olive-subtle);border:1px solid var(--portal-olive);padding:12px 18px;border-radius:var(--radius-sm);margin-bottom:24px;font-size:0.85rem;color:var(--portal-text);display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.1rem;">🩺</span>
+      <div>
+        <strong>Doctor View:</strong> Showing appointments assigned to <span id="doctorNameDisplay" style="font-weight:700;">Doctor</span>. Clinical notes and appointment statuses can be updated below.
+      </div>
+    </div>
+
+    <!-- KPI Statistics Grid (4 Horizontal Boxes on Desktop, 2x2 on Tablet/Mobile) -->
+    <section class="kpi-section" aria-label="Dashboard Summary Statistics">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-card-head">
+            <span class="kpi-label">TOTAL REQUESTS</span>
+            <span class="kpi-icon">▦</span>
+          </div>
+          <div class="kpi-value" id="statTotal">0</div>
+          <div class="kpi-subtext">All appointment inquiries</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-head">
+            <span class="kpi-label">PENDING REVIEW</span>
+            <span class="kpi-icon" style="color:var(--status-pending-text);">⏳</span>
+          </div>
+          <div class="kpi-value" id="statPending" style="color:var(--status-pending-text);">0</div>
+          <div class="kpi-subtext">Awaiting staff confirmation</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-head">
+            <span class="kpi-label">CONFIRMED VISITS</span>
+            <span class="kpi-icon" style="color:var(--status-confirmed-text);">✓</span>
+          </div>
+          <div class="kpi-value" id="statConfirmed" style="color:var(--status-confirmed-text);">0</div>
+          <div class="kpi-subtext">Scheduled on calendar</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-head">
+            <span class="kpi-label">TODAY'S CLINIC</span>
+            <span class="kpi-icon">☼</span>
+          </div>
+          <div class="kpi-value" id="statToday">0</div>
+          <div class="kpi-subtext" id="statTodayLabel">Today: 2026-11-06</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toolbar: Search, Filters & View Toggle -->
+    <section class="toolbar-section">
+      <div class="filter-tabs" role="tablist">
+        <button class="filter-tab active" data-tab="all" role="tab" aria-selected="true">
+          All <span class="filter-tab-count" id="countAll">0</span>
+        </button>
+        <button class="filter-tab" data-tab="pending" role="tab" aria-selected="false">
+          🟡 Needs Action <span class="filter-tab-count" id="countPending">0</span>
+        </button>
+        <button class="filter-tab" data-tab="confirmed" role="tab" aria-selected="false">
+          🟢 Confirmed <span class="filter-tab-count" id="countConfirmed">0</span>
+        </button>
+        <button class="filter-tab" data-tab="completed" role="tab" aria-selected="false">
+          🔵 Completed <span class="filter-tab-count" id="countCompleted">0</span>
+        </button>
+        <button class="filter-tab" data-tab="cancelled" role="tab" aria-selected="false">
+          ⚪ Cancelled <span class="filter-tab-count" id="countCancelled">0</span>
+        </button>
+      </div>
+
+      <div class="toolbar-controls">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="search" id="searchInput" class="search-input" placeholder="Search patient, phone, ref...">
+        </div>
+
+        <select id="serviceFilter" style="padding:7px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.82rem;background:#FFFFFF;color:var(--portal-text);">
+          <option value="all">All Treatments</option>
+        </select>
+
+        <div class="view-toggle">
+          <button class="view-btn active" id="viewBtnCards" title="Card Grid View">▦ Cards</button>
+          <button class="view-btn" id="viewBtnTable" title="Spreadsheet View">≡ List</button>
+        </div>
+
+        <button class="crm-btn crm-btn-secondary" id="btnSync" title="Sync live database state">
+          ⟳ Sync
+        </button>
+        <button class="crm-btn crm-btn-secondary" id="btnExportCsv" title="Export current view to CSV">
+          ⬇ Export
+        </button>
+      </div>
+    </section>
+
+    <!-- Patient Cards Grid View -->
+    <section id="cardsContainer" class="cards-grid">
+      <!-- Populated dynamically from portal.js -->
+      <div style="grid-column:1/-1;text-align:center;padding:48px 0;color:var(--portal-muted);">
+        Loading clinical records...
+      </div>
+    </section>
+
+    <!-- Spreadsheet / Table View (Initially hidden) -->
+    <section id="tableContainer" class="table-wrap" style="display:none;">
+      <table class="crm-table">
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Contact</th>
+            <th>Treatment</th>
+            <th>Scheduled Slot</th>
+            <th>Assigned Doctor</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Populated from portal.js -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- 4. Modal: Walk-in / Phone Booking -->
+  <div class="modal-backdrop" id="newBookingModal">
+    <div class="modal-sheet">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--portal-olive);font-weight:600;">NEW CLINICAL RECORD</span>
+          <h2 style="font-family:var(--font-serif);font-size:1.8rem;margin-top:2px;">Walk-in / Phone Booking</h2>
+        </div>
+        <button type="button" class="crm-btn crm-btn-ghost" id="closeNewBookingModal" style="font-size:1.4rem;">×</button>
+      </div>
+
+      <form id="newBookingForm" novalidate>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="grid-column:1/-1;">
+            <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Patient Full Name *</label>
+            <input type="text" id="walkinName" required placeholder="Full Name" style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Phone Number *</label>
+            <input type="tel" id="walkinPhone" required placeholder="+91 98765 43210" style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Email Address (Optional)</label>
+            <input type="email" id="walkinEmail" placeholder="patient@example.com" style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;">
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Treatment *</label>
+            <select id="walkinService" required style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;">
+              <option value="" disabled selected>Select treatment...</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Date</label>
+            <input type="date" id="walkinDate" style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Preferred Slot</label>
+            <select id="walkinTime" style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;">
+              <option value="10:00 AM">10:00 AM</option>
+              <option value="12:00 PM">12:00 PM</option>
+              <option value="3:00 PM">3:00 PM</option>
+              <option value="5:00 PM">5:00 PM</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Assign Doctor</label>
+            <select id="walkinDoctor" style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;">
+              <option value="">Unassigned</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Clinical or Reception Notes</label>
+            <textarea id="walkinMessage" rows="3" placeholder="Patient concerns, medical flags, previous clinic history..." style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:var(--font-sans);"></textarea>
+          </div>
+        </div>
+
+        <p id="walkinError" style="font-size:0.78rem;color:var(--status-cancelled-text);margin-top:12px;display:none;"></p>
+
+        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px;">
+          <button type="button" class="crm-btn crm-btn-secondary" id="cancelWalkinBtn">Cancel</button>
+          <button type="submit" class="crm-btn crm-btn-primary" id="saveWalkinBtn">Save Appointment <span>↗</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Modal: Manage Record / Clinical Notes -->
+  <div class="modal-backdrop" id="editModal">
+    <div class="modal-sheet">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--portal-olive);font-weight:600;">PATIENT DETAILS &amp; STATUS</span>
+          <h2 style="font-family:var(--font-serif);font-size:1.8rem;margin-top:2px;">Appointment Management</h2>
+        </div>
+        <button type="button" class="crm-btn crm-btn-ghost" id="closeEditModal" style="font-size:1.4rem;">×</button>
+      </div>
+
+      <div id="editSummary" style="background-color:var(--portal-bg);border:1px solid var(--portal-border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px;font-size:0.85rem;line-height:1.7;">
+        <!-- Filled dynamically -->
+      </div>
+
+      <form id="editForm">
+        <input type="hidden" id="editLeadId">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+          <div>
+            <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Appointment Status</label>
+            <select id="editStatus" style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;">
+              <option value="Pending">Needs Action (Pending)</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Assigned Doctor</label>
+            <select id="editDoctor" style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;">
+              <option value="Unassigned">Unassigned</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Staff Clinical Notes</label>
+          <textarea id="editStaffNotes" rows="3" placeholder="Add clinical notes, dental treatment progress, or follow-up instructions..." style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:var(--font-sans);"></textarea>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:12px;">
+          <button type="button" class="crm-btn crm-btn-secondary" id="cancelEditModal">Close</button>
+          <button type="submit" class="crm-btn crm-btn-primary" id="saveEditBtn">Save Changes <span>↗</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Modal: WhatsApp Appointment Confirmation -->
+  <div class="modal-backdrop" id="waConfirmModal">
+    <div class="modal-sheet" style="max-width:540px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--status-confirmed-text);font-weight:600;">PATIENT CONFIRMATION</span>
+          <h2 style="font-family:var(--font-serif);font-size:1.8rem;margin-top:2px;">Confirm &amp; Notify Patient</h2>
+        </div>
+        <button type="button" class="crm-btn crm-btn-ghost" id="closeWaModal" style="font-size:1.4rem;">×</button>
+      </div>
+
+      <p style="font-size:0.85rem;color:var(--portal-muted);margin-bottom:16px;">
+        Appointment confirmed in the studio calendar. Send the confirmation directly to the patient via WhatsApp.
+      </p>
+
+      <div id="waSummary" style="background-color:var(--portal-bg);border:1px solid var(--portal-border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:16px;font-size:0.85rem;line-height:1.7;"></div>
+
+      <div style="margin-bottom:20px;">
+        <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;display:block;">Personalized WhatsApp Message</label>
+        <textarea id="waMessageText" rows="4" style="width:100%;padding:10px 12px;border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.85rem;font-family:var(--font-sans);line-height:1.6;"></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:12px;">
+        <button type="button" class="crm-btn crm-btn-secondary" id="skipWaBtn">Done (Skip WhatsApp)</button>
+        <a class="crm-btn crm-btn-primary" id="sendWaBtn" href="#" target="_blank" rel="noreferrer" style="background-color:#25D366;border-color:#25D366;color:#FFFFFF;">
+          Open WhatsApp <span>💬</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Admin-Only Staff Directory Modal -->
+  <div class="modal-backdrop" id="staffModal">
+    <div class="modal-sheet" style="max-width:680px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--portal-olive);font-weight:600;">ADMINISTRATIVE ACCESS</span>
+          <h2 style="font-family:var(--font-serif);font-size:1.8rem;margin-top:2px;">Clinic Staff Directory</h2>
+        </div>
+        <button type="button" class="crm-btn crm-btn-ghost" id="closeStaffModal" style="font-size:1.4rem;">×</button>
+      </div>
+
+      <p style="font-size:0.82rem;color:var(--portal-muted);margin-bottom:16px;">
+        Review active clinical staff, adjust roles, and manage access permissions. New staff accounts are invited via Supabase Auth; they appear here for activation and role assignment.
+      </p>
+
+      <div id="staffListContainer" style="display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto;margin-bottom:20px;">
+        <div style="font-size:0.85rem;color:var(--portal-muted);">Loading staff roster...</div>
+      </div>
+
+      <div style="padding:12px 14px;background-color:var(--portal-bg);border:1px solid var(--portal-border);border-radius:var(--radius-sm);font-size:0.78rem;color:var(--portal-muted);">
+        <strong>Staff Provisioning Guide:</strong> To invite a new doctor or receptionist, send an invitation in <em>Supabase Dashboard → Authentication → Users</em>. Once the user accepts, their account appears above for activation.
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Admin-Only Notification Outbox Modal -->
+  <div class="modal-backdrop" id="outboxModal">
+    <div class="modal-sheet" style="max-width:740px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--portal-olive);font-weight:600;">RELIABLE NOTIFICATION PIPELINE</span>
+          <h2 style="font-family:var(--font-serif);font-size:1.8rem;margin-top:2px;">Notification Outbox &amp; Queue</h2>
+        </div>
+        <button type="button" class="crm-btn crm-btn-ghost" id="closeOutboxModal" style="font-size:1.4rem;">×</button>
+      </div>
+
+      <p style="font-size:0.82rem;color:var(--portal-muted);margin-bottom:16px;">
+        Inspect queued booking email notifications, delivery attempts, and retry schedules. Process pending or failed entries on demand.
+      </p>
+
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button class="crm-btn crm-btn-primary" id="btnProcessOutboxNow">Process Queue / Retry Failed ↗</button>
+        <button class="crm-btn crm-btn-secondary" id="btnRefreshOutbox">Refresh Status ⟳</button>
+      </div>
+
+      <div id="outboxListContainer" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;">
+        <div style="font-size:0.85rem;color:var(--portal-muted);">Loading outbox entries...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast" style="position:fixed;bottom:24px;right:24px;z-index:999;background-color:var(--portal-text);color:#FFFFFF;padding:12px 20px;border-radius:var(--radius-sm);font-size:0.85rem;font-weight:500;box-shadow:var(--shadow-modal);display:none;"></div>
+
+  <script src="portal.js"></script>
+</body>
+</html>

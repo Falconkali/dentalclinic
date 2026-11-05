@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F5F3ED">
+  <title>Lumière Dental Studio — Care that makes you feel like yourself.</title>
+  <meta name="description" content="A different perspective on dentistry. Thoughtful people, considered treatments and a place where your comfort comes first.">
+
+  <!-- Typography: Cormorant Garamond, Manrope, IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header & Navigation -->
+  <header class="nav-header">
+    <div class="container nav-inner">
+      <a href="#hero" class="brand-mark" aria-label="Lumière Dental Studio Home">
+        <span class="brand-title" id="navBrandTitle">Lumière</span>
+        <span class="brand-tag">Dental Studio</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a href="#philosophy">Philosophy</a>
+        <a href="#approach">Our Approach</a>
+        <a href="#treatments">Treatments</a>
+        <a href="#team">Clinical Team</a>
+        <a href="#studio">The Studio</a>
+        <a href="#faq">Questions</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="tel:+919876543210" class="nav-phone" id="navPhone">+91 98765 43210</a>
+        <a href="#booking" class="btn-v2 btn-v2-primary">Request Consultation <span>↗</span></a>
+      </div>
+
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Menu Drawer -->
+  <div class="mobile-overlay" id="mobileOverlay" aria-hidden="true">
+    <ul class="mobile-menu-links">
+      <li><a href="#philosophy" class="mobile-nav-link">01 / Philosophy</a></li>
+      <li><a href="#approach" class="mobile-nav-link">02 / Our Approach</a></li>
+      <li><a href="#treatments" class="mobile-nav-link">03 / Treatments</a></li>
+      <li><a href="#team" class="mobile-nav-link">04 / Clinical Team</a></li>
+      <li><a href="#studio" class="mobile-nav-link">05 / The Studio</a></li>
+      <li><a href="#faq" class="mobile-nav-link">06 / Questions</a></li>
+      <li><a href="#booking" class="mobile-nav-link" style="color:var(--terracotta);">07 / Request Consultation ↗</a></li>
+      <li><a href="portal.html" class="mobile-nav-link" style="font-size:1.2rem;color:var(--olive);">Staff Portal ↗</a></li>
+    </ul>
+    <div style="margin-top:40px;font-family:var(--font-mono);font-size:0.85rem;color:var(--muted-text);">
+      <p id="mobHours">Mon–Sat · 9:00–19:00</p>
+      <p style="margin-top:8px;"><a href="tel:+919876543210" id="mobPhone" style="color:var(--charcoal);">+91 98765 43210</a></p>
+    </div>
+  </div>
+
+  <main>
+    <!-- Section 1: Editorial Asymmetrical Hero -->
+    <section class="hero-v2" id="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <span class="hero-eyebrow">A Considered Approach to Oral Health</span>
+          <h1 class="hero-title">Care that makes you feel like <em>yourself.</em></h1>
+          <p class="hero-intro">
+            A different perspective on dentistry. Thoughtful clinicians, calm daylight spaces, and treatment plans shaped entirely around your priorities and long-term wellbeing.
+          </p>
+          <div class="hero-actions">
+            <a href="#booking" class="btn-v2 btn-v2-accent">Book a consultation <span>↗</span></a>
+            <a href="#philosophy" class="btn-v2 btn-v2-secondary">Our philosophy ↓</a>
+          </div>
+        </div>
+
+        <div class="hero-image-wrap">
+          <div class="hero-image-frame">
+            <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=85" alt="Natural light pouring into a clean, modern dental consultation room">
+          </div>
+          <div class="hero-caption">
+            <strong>01 / Studio Space</strong><br>
+            Designed with natural daylight and acoustic calm to put anxiety at rest.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Philosophy & Storytelling -->
+    <section class="story-section" id="philosophy">
+      <div class="container story-grid">
+        <div>
+          <span class="section-kicker">01 / Our Philosophy</span>
+          <h2 class="story-lead">Good dentistry is not merely a procedure. <em>It is how you are heard.</em></h2>
+        </div>
+        <div>
+          <p class="story-text">
+            For too long, dental care has been defined by clinical coldness, hurried appointments, and decisions made without enough explanation. We founded Lumière to offer the antithesis of that experience.
+          </p>
+          <p class="story-text">
+            Here, every initial consultation begins with a conversation, not a drill. We examine your teeth and gums with state-of-the-art digital imaging, explain our findings in plain language, and give you the time and space to decide what path feels right for you.
+          </p>
+          <div style="margin-top:28px;">
+            <a href="#team" class="btn-v2-text">Meet our clinical specialists ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Our Approach (Three Pillars) -->
+    <section class="approach-section" id="approach">
+      <div class="container">
+        <div class="section-header-editorial">
+          <span class="section-kicker">02 / Clinical Principles</span>
+          <h2>Three commitments to every patient.</h2>
+        </div>
+
+        <div class="pillars-grid">
+          <div class="pillar-item">
+            <span class="pillar-number">01 / PRINCIPLE</span>
+            <h3 class="pillar-title">Listen first.</h3>
+            <p class="pillar-desc">
+              We take time to understand your medical history, aesthetic goals, and past dental experiences. Your comfort and emotional boundaries lead every clinical recommendation.
+            </p>
+          </div>
+
+          <div class="pillar-item">
+            <span class="pillar-number">02 / PRINCIPLE</span>
+            <h3 class="pillar-title">Explain clearly.</h3>
+            <p class="pillar-desc">
+              We walk you through digital scans and treatment options with complete transparency. No surprises, no rushed commitments, and full clarity on fees and timelines.
+            </p>
+          </div>
+
+          <div class="pillar-item">
+            <span class="pillar-number">03 / PRINCIPLE</span>
+            <h3 class="pillar-title">Care thoughtfully.</h3>
+            <p class="pillar-desc">
+              From minimally invasive techniques to biocompatible materials and gentle handpieces, we preserve your natural tooth structure with rigorous craftsmanship.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Treatments Directory -->
+    <section class="treatments-section" id="treatments">
+      <div class="container">
+        <div class="section-header-editorial">
+          <span class="section-kicker">03 / Treatments &amp; Services</span>
+          <h2>Thoughtful care, from everyday prevention to complex restoration.</h2>
+          <p style="margin-top:12px;max-width:640px;">Select a treatment to review its clinical scope or initiate a consultation inquiry with our reception desk.</p>
+        </div>
+
+        <div class="treatment-list" id="treatmentListContainer">
+          <!-- Populated dynamically from clinic.config.js -->
+          <div style="padding:24px 0;font-family:var(--font-mono);font-size:0.85rem;color:var(--muted-text);">Loading treatment catalog...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: The Clinical Team -->
+    <section class="doctors-section" id="team">
+      <div class="container">
+        <div class="section-header-editorial">
+          <span class="section-kicker">04 / Our Team</span>
+          <h2>Experienced clinicians. Focused on you.</h2>
+          <p style="margin-top:12px;max-width:640px;">Our dentists combine advanced academic training with empathetic patient care. Each consultation is led by dedicated specialists.</p>
+        </div>
+
+        <div class="doctors-grid" id="doctorsGridContainer">
+          <!-- Populated dynamically from clinic.config.js -->
+          <div style="padding:24px 0;font-family:var(--font-mono);font-size:0.85rem;color:var(--muted-text);">Loading clinical team...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Studio Architecture & Environment -->
+    <section class="story-section" id="studio">
+      <div class="container">
+        <div class="section-header-editorial" style="margin-bottom:40px;">
+          <span class="section-kicker">05 / The Studio</span>
+          <h2>An environment designed for quiet calm.</h2>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.2fr 0.8fr;gap:32px;align-items:center;">
+          <div style="border-radius:var(--radius-card);overflow:hidden;box-shadow:0 12px 36px rgba(36,38,32,0.06);">
+            <img src="https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&w=1200&q=85" alt="Bright and spacious dental studio interior with natural light" style="width:100%;height:460px;object-fit:cover;">
+          </div>
+          <div>
+            <h3 style="font-size:1.8rem;margin-bottom:16px;">Spaces that soften the clinical feel.</h3>
+            <p style="margin-bottom:16px;line-height:1.7;">
+              From tactile stone surfaces and muted acoustic design to unhurried private consultation rooms, every element of our studio was considered to ease apprehension and create a welcoming, restorative atmosphere.
+            </p>
+            <p style="font-family:var(--font-mono);font-size:0.75rem;color:var(--subtle-text);letter-spacing:0.04em;">
+              * Note: Studio imagery is illustrative of interior aesthetics and architectural specifications.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Patient Experience / Testimonials -->
+    <section class="approach-section" id="reviews">
+      <div class="container">
+        <div class="section-header-editorial">
+          <span class="section-kicker">06 / Patient Voices</span>
+          <h2>Kind words from people we care for.</h2>
+        </div>
+
+        <div id="testimonialsContainer" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:32px;">
+          <!-- Populated from clinic.config.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: Appointment Request Section -->
+    <section class="booking-section" id="booking">
+      <div class="container">
+        <div class="booking-card-wrap">
+          <div class="booking-header">
+            <span class="section-kicker">07 / Reserve Your Consultation</span>
+            <h2>Begin your smile conversation.</h2>
+            <p style="color:var(--muted-text);max-width:520px;margin:8px auto 0 auto;">
+              Complete this request to receive consultation availability from our front desk. We will confirm your appointment via phone or WhatsApp.
+            </p>
+          </div>
+
+          <form id="appointmentForm" novalidate>
+            <!-- Anti-bot honeypot field -->
+            <input type="text" name="honeypot" id="honeypotField" style="display:none!important;" tabindex="-1" autocomplete="off">
+
+            <div class="form-grid-v2">
+              <div class="form-field">
+                <label for="patientName">Full Name *</label>
+                <input type="text" id="patientName" placeholder="e.g. Tanya Sharma" required autocomplete="name">
+              </div>
+
+              <div class="form-field">
+                <label for="patientPhone">Mobile Number (WhatsApp) *</label>
+                <input type="tel" id="patientPhone" placeholder="+91 98765 43210" required autocomplete="tel">
+              </div>
+
+              <div class="form-field">
+                <label for="patientEmail">Email Address (Optional)</label>
+                <input type="email" id="patientEmail" placeholder="tanya@example.com" autocomplete="email">
+              </div>
+
+              <div class="form-field">
+                <label for="treatmentChoice">Treatment of Interest *</label>
+                <select id="treatmentChoice" required>
+                  <option value="" disabled selected>Select a treatment...</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label for="preferredDate">Preferred Date</label>
+                <input type="date" id="preferredDate">
+              </div>
+
+              <div class="form-field">
+                <label for="preferredTime">Preferred Time</label>
+                <select id="preferredTime">
+                  <option value="10:00 AM">Morning (10:00 AM)</option>
+                  <option value="12:00 PM">Midday (12:00 PM)</option>
+                  <option value="3:00 PM">Afternoon (3:00 PM)</option>
+                  <option value="5:00 PM">Evening (5:00 PM)</option>
+                </select>
+              </div>
+
+              <div class="form-field form-group-full">
+                <label for="patientMessage">Additional Notes or Inquiries (Optional)</label>
+                <textarea id="patientMessage" rows="3" placeholder="Tell us about any specific symptoms, aesthetic goals, or past dental concerns..."></textarea>
+              </div>
+
+              <div class="form-group-full consent-row">
+                <input type="checkbox" id="consentCheckbox" required>
+                <label for="consentCheckbox">
+                  I consent to Lumière Dental Studio contacting me via WhatsApp, phone, or email to schedule and coordinate this appointment inquiry.
+                </label>
+              </div>
+            </div>
+
+            <div class="form-submit-row">
+              <p id="formFeedback" style="font-size:0.88rem;display:none;"></p>
+              <button type="submit" class="btn-v2 btn-v2-primary" id="submitBtn" style="padding:16px 36px;">
+                Submit Consultation Request <span>↗</span>
+              </button>
+              <span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--subtle-text);">
+                Encrypted in transit · Authenticated via Supabase Backend
+              </span>
+            </div>
+          </form>
+
+          <div id="bookingConfirmationBox" class="booking-ref-box" style="display:none;">
+            <h3 style="color:var(--olive-dark);margin-bottom:8px;">Consultation Request Received</h3>
+            <p style="font-size:0.95rem;color:var(--charcoal);margin-bottom:12px;">
+              Thank you. Your consultation enquiry has been recorded in our reception calendar.
+            </p>
+            <div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:600;color:var(--charcoal);background:#FFFFFF;display:inline-block;padding:8px 18px;border-radius:4px;border:1px solid var(--border-hairline);margin-bottom:12px;" id="confirmationRefCode">
+              Ref: LUM-XXXXXXXX
+            </div>
+            <p style="font-size:0.85rem;color:var(--muted-text);">
+              Our reception desk will contact you via WhatsApp / phone to confirm your exact consultation timing.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 9: FAQ -->
+    <section class="approach-section" id="faq">
+      <div class="container" style="max-width:960px;">
+        <div class="section-header-editorial">
+          <span class="section-kicker">08 / Questions &amp; Clarity</span>
+          <h2>Frequently asked questions.</h2>
+        </div>
+
+        <div id="faqAccordionContainer" style="display:flex;flex-direction:column;gap:16px;">
+          <!-- Populated from script.js -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer-v2">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3 id="footerBrandTitle">Lumière</h3>
+          <p id="footerTagline">Smile design, refined.</p>
+          <p style="margin-top:12px;font-size:0.85rem;line-height:1.7;" id="footerAddress">
+            12 Green Avenue, Hyderabad, Telangana
+          </p>
+        </div>
+
+        <div>
+          <span style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:#8E9287;display:block;margin-bottom:16px;">EXPLORE</span>
+          <p style="margin-bottom:10px;"><a href="#philosophy">Our Philosophy</a></p>
+          <p style="margin-bottom:10px;"><a href="#approach">Clinical Principles</a></p>
+          <p style="margin-bottom:10px;"><a href="#treatments">Treatments</a></p>
+          <p style="margin-bottom:10px;"><a href="#team">Clinical Team</a></p>
+        </div>
+
+        <div>
+          <span style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:#8E9287;display:block;margin-bottom:16px;">CONTACT</span>
+          <p style="margin-bottom:10px;"><a href="tel:+919876543210" id="footerPhone">+91 98765 43210</a></p>
+          <p style="margin-bottom:10px;"><a href="mailto:hello@lumieredental.example" id="footerEmail">hello@lumieredental.example</a></p>
+          <p style="margin-bottom:10px;"><span id="footerHours">Mon–Sat · 9:00–19:00</span></p>
+        </div>
+
+        <div>
+          <span style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:#8E9287;display:block;margin-bottom:16px;">STAFF &amp; LEGAL</span>
+          <p style="margin-bottom:10px;"><a href="portal.html" style="color:var(--olive-light);font-weight:600;">Staff Portal CRM ↗</a></p>
+          <p style="margin-bottom:10px;"><a href="../design-preview.html" style="color:#B86C52;">Design Preview Hub ↗</a></p>
+          <p style="margin-bottom:10px;"><a href="../index.html">Original V11 Website ↗</a></p>
+        </div>
+      </div>
+
+      <div class="footer-bottom-bar">
+        <span>© <span id="currentYear">2026</span> Lumière Dental Studio. All rights reserved.</span>
+        <span>Care for your smile, beautifully considered.</span>
+        <span>Version 2.0 (Editorial Preview)</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Central Config & Backend API Contracts (Unmodified V11) -->
+  <script src="../clinic.config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../clinic-api.js"></script>
+
+  <!-- Editorial Motion & Logic -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
