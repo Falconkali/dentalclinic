@@ -79,7 +79,13 @@
   const modalDoctor = $('#modalDoctor');
   const modalDate = $('#modalDate');
 
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = (() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  })();
   $('#todayDateLabel').textContent = `Today: ${todayIso}`;
 
   // 1. Toast Notification Helper
@@ -111,13 +117,24 @@
   }
 
   function formatDisplayDate(dateStr) {
-    if (!dateStr) return 'Flexible Date';
+    if (!dateStr || dateStr === 'null' || dateStr === 'undefined') return 'Flexible Date';
     try {
-      const d = new Date(dateStr + 'T00:00:00');
-      if (isNaN(d.getTime())) return dateStr;
-      const today = new Date();
-      if (d.toDateString() === today.toDateString()) return 'Today';
-      return d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+      const match = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        const y = parseInt(match[1], 10);
+        const m = parseInt(match[2], 10) - 1;
+        const d = parseInt(match[3], 10);
+        const targetDate = new Date(y, m, d);
+        const today = new Date();
+        const isToday = (
+          today.getFullYear() === y &&
+          today.getMonth() === m &&
+          today.getDate() === d
+        );
+        const formatted = targetDate.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+        return isToday ? `Today (${formatted})` : formatted;
+      }
+      return dateStr;
     } catch {
       return dateStr;
     }
@@ -140,7 +157,7 @@
       email: lead.email || '',
       service: lead.service || 'General Dentistry',
       plan: lead.plan || '',
-      date: lead.preferred_date || lead.date || todayIso,
+      date: lead.preferred_date || lead.date || null,
       time: lead.preferred_time || lead.time || '10:00 AM',
       status: displayStatus,
       doctor: lead.doctor || 'Unassigned',
@@ -387,7 +404,7 @@
     const confirmed = bookings.filter(b => b.status === 'Confirmed').length;
     const completed = bookings.filter(b => b.status === 'Completed').length;
     const cancelled = bookings.filter(b => b.status === 'Cancelled').length;
-    const todayCount = bookings.filter(b => b.date === todayIso).length;
+    const todayCount = bookings.filter(b => Boolean(b.date) && b.date.slice(0, 10) === todayIso).length;
 
     statTotal.textContent = total;
     statPending.textContent = pending;
@@ -541,7 +558,7 @@
           </td>
           <td>
             <div class="datetime-cell">
-              <strong>📅 ${esc(b.date || 'Flexible')}</strong>
+              <strong>📅 ${esc(formatDisplayDate(b.date))}</strong>
               <small>⏰ ${esc(b.time || '10:00 AM')}</small>
             </div>
           </td>
@@ -676,10 +693,11 @@
       <div class="summary-row"><span>Patient:</span><strong>${esc(item.name)}</strong></div>
       <div class="summary-row"><span>Phone:</span><strong>${esc(item.phone)}</strong></div>
       <div class="summary-row"><span>Treatment:</span><strong>${esc(item.service)}</strong></div>
-      <div class="summary-row"><span>Scheduled:</span><strong>${esc(item.date)} at ${esc(item.time)}</strong></div>
+      <div class="summary-row"><span>Scheduled:</span><strong>${esc(formatDisplayDate(item.date))} at ${esc(item.time)}</strong></div>
     `;
 
-    const defaultMsg = `Hello ${item.name}, this is ${clinicName}. We are pleased to confirm your appointment for ${item.service} on ${item.date} at ${item.time} ${doctorStr}.\n\nStudio Address: ${clinicAddr}.\n\nPlease arrive 10 minutes prior to your slot. If you need to make any changes, simply reply to this message. See you soon! 🦷`;
+    const formattedDate = formatDisplayDate(item.date);
+    const defaultMsg = `Hello ${item.name}, this is ${clinicName}. We are pleased to confirm your appointment for ${item.service} on ${formattedDate} at ${item.time} ${doctorStr}.\n\nStudio Address: ${clinicAddr}.\n\nPlease arrive 10 minutes prior to your slot. If you need to make any changes, simply reply to this message. See you soon! 🦷`;
     waMessageText.value = defaultMsg;
 
     updateWhatsAppLink();
@@ -746,7 +764,7 @@
       <div class="summary-row"><span>Patient:</span><strong>${esc(item.name)}</strong></div>
       <div class="summary-row"><span>Phone:</span><strong>${esc(item.phone)}</strong></div>
       <div class="summary-row"><span>Treatment:</span><strong>${esc(item.service)} (${esc(item.plan || 'Standard')})</strong></div>
-      <div class="summary-row"><span>Scheduled:</span><strong>${esc(item.date)} at ${esc(item.time)}</strong></div>
+      <div class="summary-row"><span>Scheduled:</span><strong>${esc(formatDisplayDate(item.date))} at ${esc(item.time)}</strong></div>
       ${item.message ? `<div class="summary-row"><span>Patient Request:</span><strong>${esc(item.message)}</strong></div>` : ''}
     `;
 
