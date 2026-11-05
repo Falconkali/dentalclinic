@@ -429,20 +429,23 @@
       const originalIdx = bookings.findIndex(x => x.id === b.id);
       const isPending = b.status === 'Pending';
       const isConfirmed = b.status === 'Confirmed';
+      const isCompleted = b.status === 'Completed';
       const phoneDigits = cleanPhone(b.phone);
       const clinicName = cfg.name || 'Lumière Dental Studio';
       const waText = encodeURIComponent(`Hello ${b.name}, this is ${clinicName} regarding your appointment for ${b.service}.`);
       const waLink = phoneDigits ? `https://wa.me/${phoneDigits}?text=${waText}` : '#';
 
       const statusBadge = isPending 
-        ? `<span class="badge-status pending">🟡 Needs Action</span>`
+        ? `<span class="badge-status pending">Needs Action</span>`
         : (isConfirmed 
-          ? `<span class="badge-status confirmed">🟢 Confirmed</span>`
-          : (b.status === 'Completed' 
-            ? `<span class="badge-status completed">🔵 Completed</span>`
-            : `<span class="badge-status cancelled">⚪ Cancelled</span>`));
+          ? `<span class="badge-status confirmed">Confirmed</span>`
+          : (isCompleted 
+            ? `<span class="badge-status completed">Completed</span>`
+            : `<span class="badge-status cancelled">Cancelled</span>`));
 
-      const cardModifier = isPending ? 'needs-action' : (isConfirmed ? 'confirmed-card' : '');
+      const cardModifier = isPending 
+        ? 'needs-action' 
+        : (isConfirmed ? 'confirmed-card' : (isCompleted ? 'completed-card' : 'cancelled-card'));
 
       return `
         <article class="patient-card ${cardModifier}" data-id="${esc(b.id)}">
@@ -493,7 +496,7 @@
               Manage / Notes ⚙
             </button>
             ${isAdmin ? `
-              <button class="card-btn-manage" style="flex:0.3;border-color:rgba(235,107,86,0.3);color:#ff9888;" data-action="delete" data-index="${originalIdx}" title="Admin Delete">
+              <button class="card-btn-delete" data-action="delete" data-index="${originalIdx}" title="Admin Delete">
                 ✕
               </button>
             ` : ''}
