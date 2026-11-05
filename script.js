@@ -289,6 +289,14 @@
       try { date.showPicker(); } catch (e) {}
     }
   });
+  const dateWrap = $('.date-wrap');
+  if (dateWrap) {
+    dateWrap.addEventListener('click', (e) => {
+      if (e.target !== date && typeof date.showPicker === 'function') {
+        try { date.showPicker(); } catch (_) { date.focus(); }
+      }
+    });
+  }
 
   $$('[data-time]').forEach(b => b.addEventListener('click', () => {
     chosenTime = b.dataset.time;
